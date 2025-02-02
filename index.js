@@ -10,7 +10,6 @@ app.use(cors());
 app.use(express.json());
 
 const verifyToken = (req, res, next) => {
-  console.log(req.headers.authorization);
   if (!req.headers.authorization) {
     return res.status(401).json({ message: "Unauthorized" });
   }
@@ -83,7 +82,7 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("/users/admin/:id", async (req, res) => {
+    app.patch("/users/admin/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
@@ -95,9 +94,9 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/users/admin/:email", async (req, res) => {
+    app.get("/users/admin/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
-      if (email !== req.decoded.email) {
+      if (email !== req.user.email) {
         return res.send({ message: "Unauthorized" });
       }
       const query = { email: email };
