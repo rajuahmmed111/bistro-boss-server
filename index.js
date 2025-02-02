@@ -43,6 +43,11 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/users", async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    });
+
     // carts collection
     app.post("/carts", async (req, res) => {
       const cartItem = req.body;
