@@ -72,7 +72,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/users", verifyToken, async (req, res) => {
+    app.get("/users", async (req, res) => {
       const result = await userCollection.find().toArray();
       res.send(result);
     });
@@ -94,6 +94,22 @@ async function run() {
       const result = await userCollection.updateOne(filter, updateDoc);
       res.send(result);
     });
+
+    app.get("/users/admin/:email", async (req, res) => {
+      const email = req.params.email;
+      if (email !== req.decoded.email) {
+        return res.send({ message: "Unauthorized" });
+      }
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+
+      let admin = false;
+      if (user) {
+        admin = user?.role === "admin";
+      }
+      res.send({ admin });
+    });
+
     app.post("/carts", async (req, res) => {
       const cartItem = req.body;
       const result = await cartCollection.insertOne(cartItem);
