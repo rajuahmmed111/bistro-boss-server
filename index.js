@@ -31,6 +31,8 @@ async function run() {
     // users collection
     app.post("/users", async (req, res) => {
       const user = req.body;
+      // insert email if user does not exist
+      // you can do this many ways (1 example: email field unique, 2 :upsert, 3: simple checking email field have in database)
       const result = await userCollection.insertOne(user);
       res.send(result);
     });
