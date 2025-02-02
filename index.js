@@ -33,6 +33,12 @@ async function run() {
       const user = req.body;
       // insert email if user does not exist
       // you can do this many ways (1 example: email field unique, 2 :upsert, 3: simple checking email field have in database)
+      const query = { email: user.email };
+      const userExist = await userCollection.findOne(query);
+      if (userExist) {
+        return res.send({ message: "User already exists", insertedId: null });
+      }
+
       const result = await userCollection.insertOne(user);
       res.send(result);
     });
