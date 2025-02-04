@@ -9,24 +9,6 @@ const port = process.env.PORT | 5000;
 app.use(cors());
 app.use(express.json());
 
-const verifyToken = (req, res, next) => {
-  if (!req.headers.authorization) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-  const token = req.headers.authorization.split(" ")[1];
-  if (!token) {
-    return res.status(403).json({ message: "Forbidden" });
-  }
-
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-    if (err) {
-      return res.status(403).json({ message: "Forbidden" });
-    }
-    req.user = decoded;
-    next();
-  });
-};
-
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.wqymbxc.mongodb.net/bistroDb?retryWrites=true&w=majority&appName=Cluster0`;
 
@@ -56,6 +38,22 @@ async function run() {
       res.send({ token });
     });
 
+    const verifyToken = (req, res, next) => {
+      // console.log(req.headers.authorization);
+      if (!req.headers.authorization) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const token = req.headers.authorization.split(" ")[1];
+
+      jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        if (err) {
+          return res.status(403).json({ message: "Forbidden" });
+        }
+        req.decoded = decoded;
+        next();
+      });
+    };
+
     // use verify admin after verify token
     const verifyAdmin = async (req, res, next) => {
       const email = req.decoded?.email;
@@ -68,6 +66,26 @@ async function run() {
     };
 
     // users collection
+    app.get("/users", verifyToken, async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.get("/users/admin/:email", verifyToken, async (req, res) => {
+      const email = req.params.email;
+      if (email !== req.decoded?.email) {
+        return res.status(403).send({ message: "Forbidden" });
+      }
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+
+      let admin = false;
+      if (user) {
+        admin = user?.role === "admin";
+      }
+      res.send({ admin });
+    });
+
     app.post("/users", async (req, res) => {
       const user = req.body;
       // insert email if user does not exist
@@ -79,12 +97,6 @@ async function run() {
       }
 
       const result = await userCollection.insertOne(user);
-      res.send(result);
-    });
-
-    app.get("/users", async (req, res) => {
-      console.log(req.headers);
-      const result = await userCollection.find().toArray();
       res.send(result);
     });
 
@@ -106,21 +118,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/users/admin/:email", verifyToken, async (req, res) => {
-      const email = req.params.email;
-      if (email !== req.decoded?.email) {
-        return res.send({ message: "Unauthorized" });
-      }
-      const query = { email: email };
-      const user = await userCollection.findOne(query);
-
-      let admin = false;
-      if (user) {
-        admin = user?.role === "admin";
-      }
-      res.send({ admin });
-    });
-
+    // carts collection
     app.post("/carts", async (req, res) => {
       const cartItem = req.body;
       const result = await cartCollection.insertOne(cartItem);
