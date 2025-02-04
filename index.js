@@ -163,6 +163,16 @@ async function run() {
       res.send(result);
     });
 
+    app.put("/menu/:id", verifyToken, verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: req.body,
+      };
+      const result = await menuCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
     // reviews collection
     app.get("/reviews", async (req, res) => {
       const result = await reviewCollection.find().toArray();
