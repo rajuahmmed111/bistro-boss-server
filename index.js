@@ -158,7 +158,8 @@ async function run() {
 
     app.delete("/menu/:id", verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
-      const result = await menuCollection.deleteOne({ _id: new ObjectId(id) });
+      const query = { _id: new ObjectId(id) };
+      const result = await menuCollection.deleteOne();
       res.send(result);
     });
 
