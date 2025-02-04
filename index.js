@@ -82,7 +82,8 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/users", verifyToken, async (req, res) => {
+    app.get("/users", async (req, res) => {
+      console.log(req.headers);
       const result = await userCollection.find().toArray();
       res.send(result);
     });
