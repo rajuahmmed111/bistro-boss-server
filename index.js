@@ -239,17 +239,30 @@ async function run() {
     });
 
     // stats or analytics for dashboard
-    app.get("/admin-stats", async (req, res) => {
+    app.get("/admin-stats", verifyToken, verifyAdmin, async (req, res) => {
       const totalOrders = await paymentCollection.estimatedDocumentCount();
       const totalUsers = await userCollection.estimatedDocumentCount();
       const totalMenuItems = await menuCollection.estimatedDocumentCount();
 
       // not right way
-      const payments = await paymentCollection.find().toArray();
-      const totalRevenues = payments.reduce(
-        (total, payment) => total + payment.amount,
-        0
-      );
+      // const payments = await paymentCollection.find().toArray();
+      // const totalRevenues = payments.reduce(
+      //   (total, payment) => total + payment.amount,
+      //   0
+      // );
+
+      const result = await paymentCollection
+        .aggregate([
+          {
+            $group: {
+              _id: null,
+              totalRevenues: { $sum: "$amount" },
+            },
+          },
+        ])
+        .toArray();
+      const totalRevenues = result.length > 0 ? result[0].totalRevenues : 0;
+
       res.send({
         totalOrders,
         totalUsers,
