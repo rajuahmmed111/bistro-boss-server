@@ -196,6 +196,15 @@ async function run() {
     });
 
     // payment intents
+    app.get("/payments/:email", async (req, res) => {
+      const query = req.params.email;
+      if (req.params.email !== req.decoded.email) {
+        return res.status(403).send({ message: "Forbidden Access" });
+      }
+      const result = await paymentCollection.find(query).toArray();
+      res.send(result);
+    });
+
     app.post("/create-payment-intent", async (req, res) => {
       const { price } = req.body;
       const amount = parseInt(price * 100);
@@ -214,7 +223,7 @@ async function run() {
 
     app.post("/payment", async (req, res) => {
       const payment = req.body;
-      console.log(payment);
+      // console.log(payment);
       const paymentResult = await paymentCollection.insertOne(payment);
 
       // carefully delete each item the cart
