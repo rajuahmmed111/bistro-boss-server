@@ -29,6 +29,7 @@ async function run() {
     const menuCollection = client.db("bistroDb").collection("menu");
     const reviewCollection = client.db("bistroDb").collection("reviews");
     const cartCollection = client.db("bistroDb").collection("carts");
+    const paymentCollection = client.db("bistroDb").collection("payments");
 
     // jwt
     app.post("/jwt", async (req, res) => {
@@ -209,6 +210,15 @@ async function run() {
       res.send({
         clientSecret: paymentIntents.client_secret,
       });
+    });
+
+    app.post("/payment", async (req, res) => {
+      const payment = req.body;
+      const paymentResult = await paymentCollection.insertOne(payment);
+
+      // carefully delete each item the cart
+      res.send(paymentResult);
+      console.log(payment);
     });
 
     await client.db("admin").command({ ping: 1 });
