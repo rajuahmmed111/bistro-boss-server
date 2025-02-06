@@ -194,6 +194,21 @@ async function run() {
       res.send(result);
     });
 
+    // payment intents
+    app.post("/create-payment-intents", async (req, res) => {
+      const { price } = req.body;
+      const amount = parseInt(price * 100);
+      const paymentIntents = await stripe.paymentIntents.create({
+        amount,
+        currency: "usd",
+        payment_method_type: ["card"],
+      });
+
+      res.send({
+        clientSecret: paymentIntents.client_secret,
+      });
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
