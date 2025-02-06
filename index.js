@@ -214,11 +214,19 @@ async function run() {
 
     app.post("/payment", async (req, res) => {
       const payment = req.body;
+      console.log(payment);
       const paymentResult = await paymentCollection.insertOne(payment);
 
       // carefully delete each item the cart
-      res.send(paymentResult);
-      console.log(payment);
+      const query = {
+        _id: {
+          $in: payment.cartIds.map((id) => new ObjectId(id)),
+        },
+      };
+
+      const deleteResult = await cartCollection.deleteMany(query);
+
+      res.send({ paymentResult, deleteResult });
     });
 
     await client.db("admin").command({ ping: 1 });
