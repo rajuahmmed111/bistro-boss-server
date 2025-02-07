@@ -300,6 +300,13 @@ async function run() {
           {
             $unwind: "$menuItems",
           },
+          {
+            $group: {
+              _id:"menuItems.category",
+              totalQuantity: { $sum: 1 },
+              totalPrice: { $sum: "$menuItems.price" },
+            }
+          }
         ])
         .toArray();
       res.send(results);
