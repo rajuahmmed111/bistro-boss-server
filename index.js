@@ -286,9 +286,20 @@ async function run() {
     app.get("/order-status", async (req, res) => {
       const results = await paymentCollection
         .aggregate([
-          // {
-          //   $unwind: "$menuItemIds",
-          // },
+          {
+            $unwind: "$menuItemIds",
+          },
+          {
+            $lookup: {
+              from: "menu",
+              localField: "menuItemIds",
+              foreignField: "_id",
+              as: "menuItems",
+            },
+          },
+          {
+            $unwind: "$menuItems",
+          },
         ])
         .toArray();
       res.send(results);
