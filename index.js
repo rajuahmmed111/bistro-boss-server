@@ -302,11 +302,19 @@ async function run() {
           },
           {
             $group: {
-              _id:"$menuItems.category",
+              _id: "$menuItems.category",
               quantity: { $sum: 1 },
               revenue: { $sum: "$menuItems.price" },
-            }
-          }
+            },
+          },
+          {
+            $project: {
+              _id: 1,
+              category: "$_id",
+              quantity: 1,
+              revenue: 1,
+            },
+          },
         ])
         .toArray();
       res.send(results);
