@@ -276,11 +276,24 @@ async function run() {
     // Non-efficient way
     // ------------------------------
     /**
-     * 1. load all payments 
+     * 1. load all payments
      * 2. for every menuItemIds (which in the array), go find menu collection
      * 3. for every item in the menu collection that you found from a payment entry
      */
-    
+
+    // or
+    // use aggregate pipeline
+    app.get("/order-status", async (req, res) => {
+      const results = await paymentCollection
+        .aggregate([
+          // {
+          //   $unwind: "$menuItemIds",
+          // },
+        ])
+        .toArray();
+      res.send(results);
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
