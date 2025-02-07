@@ -272,8 +272,15 @@ async function run() {
     });
 
     // order status
+    // ------------------------------
+    // Non-efficient way
+    // ------------------------------
+    /**
+     * 1. load all payments 
+     * 2. for every menuItemIds (which in the array), go find menu collection
+     * 3. for every item in the menu collection that you found from a payment entry
+     */
     
-
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
