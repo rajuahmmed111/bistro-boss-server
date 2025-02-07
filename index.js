@@ -303,8 +303,8 @@ async function run() {
           {
             $group: {
               _id:"$menuItems.category",
-              totalQuantity: { $sum: 1 },
-              totalPrice: { $sum: "$menuItems.price" },
+              quantity: { $sum: 1 },
+              revenue: { $sum: "$menuItems.price" },
             }
           }
         ])
