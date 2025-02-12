@@ -253,6 +253,25 @@ async function run() {
       res.send({ paymentResult, deleteResult });
     });
 
+    app.post("/create-ssl-payment", async(req, res) => {
+      const { price, cardNumber, expiryMonth, expiryYear, cvc } = req.body;
+      const amount = parseInt(price * 100);
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount,
+        currency: "usd",
+        payment_method_data: {
+          type: "card",
+          card: {
+            number: cardNumber,
+            exp_month: expiryMonth,
+            exp_year: expiryYear,
+            cvc,
+          },
+        },
+      });
+      res.send({ paymentIntent });
+    })
+
     // stats or analytics for dashboard
     app.get("/admin-stats", verifyToken, verifyAdmin, async (req, res) => {
       const totalOrders = await paymentCollection.estimatedDocumentCount();
