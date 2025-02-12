@@ -9,7 +9,7 @@ const port = process.env.PORT | 5000;
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 // SSLCommerz Payment Gateway Integration
-const SSLCommerzPayment = require("sslcommerz-lts");
+// const SSLCommerzPayment = require("sslcommerz-lts");
 const store_id = process.env.SSL_STORE_ID;
 const store_passwd = process.env.SSL_STORE_PASS;
 
@@ -260,8 +260,12 @@ async function run() {
       const payment = req.body;
       console.log(payment, "payment in server");
 
+      const trxId = new ObjectId().toString();
+
       // initiate ssl payment
       const initiate = {
+        store_id: store_id,
+        store_passwd: store_passwd,
         total_amount: payment.amount,
         currency: "BDT",
         tran_id: trxId, // use unique tran_id for each api call
