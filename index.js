@@ -4,7 +4,14 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const port = process.env.PORT | 5000;
+
+// Stripe Integration
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
+// SSLCommerz Payment Gateway Integration
+const SSLCommerzPayment = require("sslcommerz-lts");
+const store_id = process.env.SSL_STORE_ID;
+const store_passwd = process.env.SSL_STORE_PASS;
 
 // middleware
 app.use(cors());
@@ -13,15 +20,11 @@ app.use(express.json());
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.wqymbxc.mongodb.net/bistroDb?retryWrites=true&w=majority&appName=Cluster0`;
 
- 
 // Store ID: bistr67aca28f36646
 // Store Password (API/Secret Key): bistr67aca28f36646@ssl
 
-
 // Merchant Panel URL: https://sandbox.sslcommerz.com/manage/ (Credential as you inputted in the time of registration)
 
-
- 
 // Store name: testbistrzuss
 // Registered URL: www.bistroboss.com
 // Session API to generate transaction: https://sandbox.sslcommerz.com/gwprocess/v3/api.php
@@ -253,26 +256,42 @@ async function run() {
       res.send({ paymentResult, deleteResult });
     });
 
-    app.post("/create-ssl-payment", async(req, res) => {
-      const payment = req.body
+    app.post("/create-ssl-payment", async (req, res) => {
+      const payment = req.body;
       console.log(payment, "payment in server");
-      // const { price, cardNumber, expiryMonth, expiryYear, cvc } = req.body;
-      // const amount = parseInt(price * 100);
-      // const paymentIntent = await stripe.paymentIntents.create({
-      //   amount,
-      //   currency: "usd",
-      //   payment_method_data: {
-      //     type: "card",
-      //     card: {
-      //       number: cardNumber,
-      //       exp_month: expiryMonth,
-      //       exp_year: expiryYear,
-      //       cvc,
-      //     },
-      //   },
-      // });
-      // res.send({ paymentIntent });
-    })
+
+      // initiate ssl payment
+      const initiate = {
+        total_amount: payment.amount,
+        currency: "BDT",
+        tran_id: trxId, // use unique tran_id for each api call
+        success_url: "http://localhost:5173/success",
+        fail_url: "http://localhost:5173/fail",
+        cancel_url: "http://localhost:5173/cancel",
+        ipn_url: "http://localhost:5173/ipn",
+        shipping_method: "Courier",
+        product_name: "Computer.",
+        product_category: "Electronic",
+        product_profile: "general",
+        cus_name: "Customer Name",
+        cus_email: "customer@example.com",
+        cus_add1: "Dhaka",
+        cus_add2: "Dhaka",
+        cus_city: "Dhaka",
+        cus_state: "Dhaka",
+        cus_postcode: "1000",
+        cus_country: "Bangladesh",
+        cus_phone: "01711111111",
+        cus_fax: "01711111111",
+        ship_name: "Customer Name",
+        ship_add1: "Dhaka",
+        ship_add2: "Dhaka",
+        ship_city: "Dhaka",
+        ship_state: "Dhaka",
+        ship_postcode: 1000,
+        ship_country: "Bangladesh",
+      };
+    });
 
     // stats or analytics for dashboard
     app.get("/admin-stats", verifyToken, verifyAdmin, async (req, res) => {
