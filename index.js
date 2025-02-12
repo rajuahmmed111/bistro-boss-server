@@ -18,6 +18,7 @@ app.use(cors());
 app.use(express.json());
 
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const { default: axios } = require("axios");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.wqymbxc.mongodb.net/bistroDb?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Store ID: bistr67aca28f36646
@@ -269,16 +270,16 @@ async function run() {
         total_amount: payment.amount,
         currency: "BDT",
         tran_id: trxId, // use unique tran_id for each api call
-        success_url: "http://localhost:5173/success",
+        success_url: "http://localhost:5173/success-payment",
         fail_url: "http://localhost:5173/fail",
         cancel_url: "http://localhost:5173/cancel",
-        ipn_url: "http://localhost:5173/ipn",
+        ipn_url: "http://localhost:5173/ipn-success-payment",
         shipping_method: "Courier",
         product_name: "Computer.",
         product_category: "Electronic",
         product_profile: "general",
         cus_name: "Customer Name",
-        cus_email: "customer@example.com",
+        cus_email: `${payment.email}`,
         cus_add1: "Dhaka",
         cus_add2: "Dhaka",
         cus_city: "Dhaka",
@@ -295,6 +296,18 @@ async function run() {
         ship_postcode: 1000,
         ship_country: "Bangladesh",
       };
+
+      const iniResponse = await axios({
+        url: "https://sandbox.sslcommerz.com/gwprocess/v4/api.php",
+        method: "POST",
+        data: initiate,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      });
+
+      const gatewayUrl = iniResponse?.data?.GatewayPageURL;
+      console.log(gatewayUrl, "gatewayUrl");
     });
 
     // stats or analytics for dashboard
