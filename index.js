@@ -16,7 +16,7 @@ const store_passwd = process.env.SSL_STORE_PASS;
 // middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
 
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const { default: axios } = require("axios");
