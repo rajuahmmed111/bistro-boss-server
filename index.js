@@ -262,6 +262,7 @@ async function run() {
       console.log(payment, "payment in server");
 
       const trxId = new ObjectId().toString();
+      payment.transactionId = trxId;
 
       // initiate ssl payment
       const initiate = {
@@ -306,8 +307,10 @@ async function run() {
         },
       });
 
+      const saveData = await paymentCollection.insertOne(payment);
       const gatewayUrl = iniResponse?.data?.GatewayPageURL;
       console.log(gatewayUrl, "gatewayUrl");
+      res.send({ gatewayUrl });
     });
 
     // stats or analytics for dashboard
