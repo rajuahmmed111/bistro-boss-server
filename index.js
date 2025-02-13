@@ -16,6 +16,7 @@ const store_passwd = process.env.SSL_STORE_PASS;
 // middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded());
 
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const { default: axios } = require("axios");
@@ -259,7 +260,7 @@ async function run() {
 
     app.post("/create-ssl-payment", async (req, res) => {
       const payment = req.body;
-      console.log(payment, "payment in server");
+      // console.log(payment, "payment in server");
 
       const trxId = new ObjectId().toString();
       payment.transactionId = trxId;
@@ -309,8 +310,13 @@ async function run() {
 
       const saveData = await paymentCollection.insertOne(payment);
       const gatewayUrl = iniResponse?.data?.GatewayPageURL;
-      console.log(gatewayUrl, "gatewayUrl");
+      // console.log(gatewayUrl, "gatewayUrl");
       res.send({ gatewayUrl });
+    });
+
+    app.post("/success-payment", async (req, res) => {
+      const paymentSuccess = req.body;
+      console.log(paymentSuccess, "paymentSuccess");
     });
 
     // stats or analytics for dashboard
