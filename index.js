@@ -317,6 +317,36 @@ async function run() {
     app.post("/success-payment", async (req, res) => {
       const paymentSuccess = req.body;
       console.log(paymentSuccess, "paymentSuccess");
+
+      // validate payment
+      const isValidate = await axios.get(
+        `https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php?val_id=${paymentSuccess.val_id}&store_id=bistr67aca28f36646&store_passwd=bistr67aca28f36646@ssl&format=json`
+      );
+      if (isValidate.data.status !== "VALID") {
+        res.send({ message: "Payment Failed" });
+      }
+
+      // update payment status
+      const updatePayment = await paymentCollection.updateOne(
+        { transactionId: isValidate.data.tran_id },
+        { $set: { status: "success" } }
+      );
+      // console.log(updatePayment, "updatePayment");
+
+      const payment = await paymentCollection.findOne({
+        transactionId: isValidate.data.tran_id,
+      });
+
+      const query = {
+        _id: {
+          $in: payment.cartIds.map((id) => new ObjectId(id)),
+        },
+      };
+
+      const deleteResult = await cartCollection.deleteMany(query);
+      res.redirect("http://localhost:5173/success")
+
+
     });
 
     // stats or analytics for dashboard
